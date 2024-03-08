@@ -6,15 +6,8 @@
 
 #define list_entry(ptr, type, member) container_of(ptr, type, member)
 
-#define hlist_for_each(pos, head) \
-    for (pos = (head)->first; pos; pos = pos->next)
-
-struct hlist_node {
-    struct hlist_node *next, **pprev;
-};
-struct hlist_head {
-    struct hlist_node *first;
-};
+#define list_for_each(pos, head) \
+    for (pos = (head)->right; pos!=head ; pos = pos->right)
 
 struct TreeNode {
     int val;
@@ -22,8 +15,7 @@ struct TreeNode {
 };
 
 struct order_node {
-    struct hlist_node node;
-    int val;
+    struct TreeNode node;
     int idx;
 };
 
