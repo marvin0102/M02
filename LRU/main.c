@@ -1,28 +1,53 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "lru_cache.h"
 
-#include "lru_cache.h" // 假设 LRUCache 相关的头文件为 lru_cache.h
+#define MAX_CAPACITY 5 // Maximum capacity of the cache
+#define NUM_OPERATIONS 10 // Number of random operations to perform
+
+bool check_cache(LRUCache *obj, int key, int value){
+    struct list_head *ptr = obj->dhead.next;
+    LRUNode *cache = list_entry(ptr, LRUNode, link);
+
+
+    cache = list_first_entry(&obj->dhead, LRUNode, link);
+    if (cache->key != key || cache->value != value) {
+        printf("FAIL: (Expected: %d, Actual: %d)\n", value, cache->value);
+        return false;
+    }
+    return true;
+}
+
+// Function to generate a random number between min and max
+int random_int(int min, int max) {
+    return min + rand() % (max - min + 1);
+}
 
 int main() {
-    // 创建一个容量为 3 的 LRUCache
-    LRUCache *cache = lRUCacheCreate(3);
+    srand(time(NULL)); // Seed the random number generator
 
-    // 添加一些键值对
-    lRUCachePut(cache, 1, 10);
-    lRUCachePut(cache, 2, 20);
-    lRUCachePut(cache, 3, 30);
+    LRUCache *cache = lRUCacheCreate(MAX_CAPACITY);
 
-    // 测试获取值
-    printf("Value for key 1: %d\n", lRUCacheGet(cache, 1)); // 应该输出 10
-    printf("Value for key 2: %d\n", lRUCacheGet(cache, 2)); // 应该输出 20
+    for (int i = 0; i < NUM_OPERATIONS; i++) {
+        int operation = random_int(0, 1); // 0 for put, 1 for get
+        int key = random_int(1, 10); // Random key between 1 and 100
+        int value = random_int(1, 100); // Random value between 1 and 1000
 
-    // 添加新的键值对
-    lRUCachePut(cache, 4, 40);
+        if (operation == 0) {
+            // Put operation
+            printf("Operation %d: Put (%d, %d)\n", i+1, key, value);
+            lRUCachePut(cache, key, value);
+        } else {
+            // Get operation
+            printf("Operation %d: Get (%d)\n", i+1, key);
+            int retrieved_value = lRUCacheGet(cache, key);
+            printf("Retrieved value: %d\n", retrieved_value);
+        }
 
-    // 测试获取值
-    printf("Value for key 3: %d\n", lRUCacheGet(cache, 3)); // 应该输出 -1，因为 key 3 已经被淘汰
-    printf("Value for key 4: %d\n", lRUCacheGet(cache, 4)); // 应该输出 40
 
-    // 释放 LRUCache
+    }
+
     lRUCacheFree(cache);
 
     return 0;
