@@ -16,6 +16,41 @@ struct pair {
 
 static size_t stk_size;
 
+static struct list_head *merge_Galloping(void *priv,
+                               list_cmp_func_t cmp,
+                               struct list_head *a,
+                               struct list_head *b)
+{
+    struct list_head *head;
+    struct list_head **tail = &head;
+
+    for (;;) {
+        /* if equal, take 'a' -- important for sort stability */
+        if (cmp(priv, a, b) <= 0) {
+            while(a && cmp(priv, a, b) <= 0){
+                *tail = a;
+                tail = &(*tail)->next;
+                a = a->next;
+            }
+            if (!a) {
+                *tail = b;
+                break;
+            }
+        } else {
+            while(b && cmp(priv, a, b) > 0){
+                *tail = b;
+                tail = &(*tail)->next;
+                b = b->next;
+            }
+            if (!b) {
+                *tail = a;
+                break;
+            }
+        }
+    }
+    return head;
+}
+
 static struct list_head *merge(void *priv,
                                list_cmp_func_t cmp,
                                struct list_head *a,
